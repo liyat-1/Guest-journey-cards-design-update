@@ -22,8 +22,8 @@ export function FilterBar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b border-border bg-card">
-      <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-center gap-2 px-6 py-2.5">
+    <div className="glass-bar sticky top-14 z-20 border-b border-border">
+      <div className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center gap-2 px-5 py-2.5 sm:px-8">
         <Field
           label="Date range"
           value={filters.range}
@@ -83,7 +83,7 @@ export function FilterBar() {
       </div>
 
       {open && (
-        <div className="mx-auto grid w-full max-w-[1240px] gap-2 px-6 pb-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mx-auto grid w-full max-w-[1180px] gap-2 px-5 pb-3 sm:px-8 sm:grid-cols-2 lg:grid-cols-5">
           <Field
             label="Channel"
             value={filters.channel}

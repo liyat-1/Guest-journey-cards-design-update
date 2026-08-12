@@ -36,7 +36,7 @@ export function OpportunityCard({
   const play = bestPlay(opportunity);
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-5">
+    <div className="premium-panel edge-sheen p-4 sm:p-5">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -147,29 +147,38 @@ export function OpportunityLine({
   const play = bestPlay(opportunity);
 
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-primary/20 bg-primary-soft/40 px-4 py-3">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-[10px] font-semibold tracking-[0.14em] text-primary uppercase shadow-card">
-        <Sparkles className="size-3" strokeWidth={2.4} /> Opportunity
-      </span>
-      <p className="min-w-0 flex-1 text-[12.5px] leading-relaxed text-foreground">
-        {scale.value(opportunity.headline)} ·{" "}
-        <span className="font-semibold">
-          {scale.value(opportunity.revenueOpportunity)} potential
+    <div className="relative mt-4 overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary-soft/70 via-primary-soft/35 to-transparent px-4 py-3">
+      <span
+        className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-primary/70"
+        aria-hidden
+      />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
+          <Sparkles className="size-3" strokeWidth={2.4} /> Opportunity
         </span>
-        {play && <span className="text-muted-foreground"> · best offer {play.offerName}</span>}
-      </p>
-      {onView && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onView();
-          }}
-          className="shrink-0 text-[12.5px] font-semibold text-primary hover:underline"
-        >
-          View opportunity →
-        </button>
-      )}
+        <p className="min-w-0 flex-1 text-[12.5px] leading-relaxed text-foreground">
+          {scale.value(opportunity.headline)}
+          <span className="mx-1.5 text-border-strong">|</span>
+          <span className="font-semibold tabular-nums">
+            {scale.value(opportunity.revenueOpportunity)}
+          </span>{" "}
+          <span className="text-muted-foreground">potential</span>
+          {play && <span className="text-muted-foreground"> · best offer {play.offerName}</span>}
+        </p>
+        {onView && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onView();
+            }}
+            className="shrink-0 rounded-full bg-card px-3 py-1.5 text-[12px] font-semibold text-primary shadow-card ring-1 ring-primary/15 transition-all hover:bg-primary hover:text-primary-foreground hover:ring-primary"
+          >
+            View opportunity →
+          </button>
+        )}
+      </div>
     </div>
   );
 }
+

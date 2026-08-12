@@ -177,7 +177,7 @@ export function MessageEditor({
         </div>
 
         <div className="lg:sticky lg:top-4">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <div className="premium-panel edge-sheen p-4">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
                 Live preview

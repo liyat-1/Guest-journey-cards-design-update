@@ -65,7 +65,16 @@
     0 1px 2px oklch(0.25 0.05 258 / 0.06), 0 12px 28px -12px oklch(0.25 0.05 258 / 0.18);
   --shadow-pop: 0 8px 30px -8px oklch(0.25 0.05 258 / 0.22);
   --shadow-raise: 0 1px 1px oklch(0.25 0.05 258 / 0.04), 0 6px 16px -10px oklch(0.25 0.05 258 / 0.16);
+  /* Premium elevation set: crisp hairline + long, soft, low-opacity shadow. */
+  --shadow-elevated:
+    0 0 0 1px oklch(0.25 0.05 258 / 0.045), 0 1px 2px oklch(0.25 0.05 258 / 0.04),
+    0 18px 40px -20px oklch(0.25 0.05 258 / 0.2);
+  --shadow-float:
+    0 0 0 1px oklch(0.25 0.05 258 / 0.05), 0 26px 60px -28px oklch(0.25 0.05 258 / 0.3);
+  --shadow-glow: 0 10px 30px -12px color-mix(in oklab, var(--primary) 45%, transparent);
+  --shadow-inset-top: inset 0 1px 0 oklch(1 0 0 / 0.6);
 }
+
 
 :root {
   --radius: 0.5rem;
@@ -176,8 +185,102 @@
 @utility app-canvas {
   background-color: var(--color-background);
   background-image:
-    radial-gradient(60rem 30rem at 50% -12rem, color-mix(in oklab, var(--primary) 7%, transparent), transparent),
-    linear-gradient(to right, color-mix(in oklab, var(--foreground) 3.5%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 3.5%, transparent) 1px, transparent 1px);
-  background-size: 100% 100%, 64px 64px, 64px 64px;
+    radial-gradient(
+      70rem 34rem at 50% -14rem,
+      color-mix(in oklab, var(--primary) 9%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      44rem 24rem at 100% 0%,
+      color-mix(in oklab, var(--gold) 7%, transparent),
+      transparent
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--foreground) 3%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--foreground) 3%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 100% 100%, 100% 100%, 72px 72px, 72px 72px;
 }
+
+/* Frosted bar used by the top bar, tab rail and filter bar. */
+@utility glass-bar {
+  background-color: color-mix(in oklab, var(--card) 72%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+}
+
+/* Premium panel: hairline border, inner top highlight, long soft shadow. */
+@utility premium-panel {
+  position: relative;
+  background-color: var(--color-card);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  border-radius: var(--radius-3xl);
+  box-shadow: var(--shadow-elevated), var(--shadow-inset-top);
+}
+
+/* A one-pixel light sweep across the top edge of a surface. */
+@utility edge-sheen {
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 1rem;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in oklab, var(--foreground) 12%, transparent),
+      transparent
+    );
+    pointer-events: none;
+  }
+}
+
+/* Gold foil surface for offers/gift cards. */
+@utility foil {
+  background-image: linear-gradient(
+    118deg,
+    color-mix(in oklab, var(--gold) 16%, var(--card)) 0%,
+    color-mix(in oklab, var(--gold) 6%, var(--card)) 34%,
+    color-mix(in oklab, var(--gold) 26%, var(--card)) 55%,
+    color-mix(in oklab, var(--gold) 8%, var(--card)) 78%,
+    color-mix(in oklab, var(--gold) 18%, var(--card)) 100%
+  );
+}
+
+/* Deep brand gradient for hero bands and primary emphasis. */
+@utility brand-gradient {
+  background-image: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 92%, black) 0%,
+    var(--primary) 46%,
+    color-mix(in oklab, var(--primary) 70%, var(--tone-plum)) 100%
+  );
+}
+
+@utility text-balance-tight {
+  text-wrap: balance;
+  letter-spacing: -0.02em;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility rise-in {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
