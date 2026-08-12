@@ -241,33 +241,34 @@ export function ResultTile({
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border px-4 py-4 transition-shadow hover:shadow-raise ${
-        emphasis
-          ? "border-primary/25 bg-gradient-to-br from-primary-soft/70 to-card"
-          : "border-border bg-card shadow-card"
+      className={`premium-panel edge-sheen relative flex min-h-[148px] flex-col overflow-hidden rounded-2xl px-4 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-float ${
+        emphasis ? "border-primary/25 bg-gradient-to-br from-primary-soft/60 to-card" : ""
       }`}
     >
       {emphasis && (
         <span className="absolute inset-x-0 top-0 h-[2px] bg-primary/70" aria-hidden />
       )}
       <div className="flex items-start gap-1.5">
-        <p className="text-[11px] leading-tight font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+        <p className="text-[10.5px] leading-[1.35] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
           {label}
         </p>
         {method && <InfoTip>{method}</InfoTip>}
       </div>
-      <p className="mt-2 text-[24px] leading-none font-semibold tracking-[-0.03em] text-foreground tabular-nums">
+      <p className="mt-2.5 text-[26px] leading-none font-semibold tracking-[-0.035em] text-foreground tabular-nums">
         {value}
       </p>
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-        {delta && <DeltaTag delta={delta} suffix="vs previous" />}
-      </div>
+      {delta && (
+        <p className="mt-2">
+          <DeltaTag delta={delta} suffix="vs prev" />
+        </p>
+      )}
       {context && (
-        <p className="mt-1 text-[11.5px] leading-snug text-muted-foreground">{context}</p>
+        <p className="mt-auto pt-2 text-[11px] leading-snug text-muted-foreground">{context}</p>
       )}
     </div>
   );
 }
+
 
 
 export function EmptyState({
