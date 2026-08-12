@@ -61,7 +61,7 @@ export function Device({
   }
   return (
     <div>
-      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-elevated">
         {chrome === "mail" ? (
           <div className="flex items-center gap-3 border-b border-border bg-secondary/60 px-4 py-2.5">
             <div className="flex gap-1.5">
@@ -217,7 +217,7 @@ export function LandingRender({
       </div>
 
       <div className="-mt-4 px-4">
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+        <div className="premium-panel edge-sheen p-4">
           <div className="grid grid-cols-2 gap-3">
             {l.facts.map((f) => (
               <div key={f.label}>

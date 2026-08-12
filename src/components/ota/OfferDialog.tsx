@@ -295,7 +295,7 @@ export function OfferDialog({
         </div>
 
         <div className="space-y-3 lg:sticky lg:top-4">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-card">
+          <div className="premium-panel edge-sheen p-4">
             <p className="text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
               How the guest sees it
             </p>

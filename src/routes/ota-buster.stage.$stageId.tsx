@@ -136,7 +136,7 @@ function StageDetail() {
         <span className="text-[12.5px] font-semibold text-foreground">{stage.name}</span>
       </div>
 
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
+      <div className="premium-panel edge-sheen relative overflow-hidden p-5 sm:p-6">
         <span className={`absolute inset-y-0 left-0 w-[3px] ${look.rail}`} aria-hidden />
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 gap-3.5">

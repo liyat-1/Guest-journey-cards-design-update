@@ -15,9 +15,11 @@ export function SectionHeading({
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h2 className="text-[19px] font-semibold tracking-[-0.015em] text-foreground">{title}</h2>
+        <h2 className="text-balance-tight text-[21px] font-semibold text-foreground">{title}</h2>
         {subtitle && (
-          <p className="mt-1 max-w-2xl text-[13.5px] text-muted-foreground">{subtitle}</p>
+          <p className="mt-1.5 max-w-2xl text-[13.5px] leading-relaxed text-muted-foreground">
+            {subtitle}
+          </p>
         )}
       </div>
       {action}
@@ -27,13 +29,10 @@ export function SectionHeading({
 
 export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <section
-      className={`rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6 ${className}`}
-    >
-      {children}
-    </section>
+    <section className={`premium-panel edge-sheen p-5 sm:p-6 ${className}`}>{children}</section>
   );
 }
+
 
 export function PanelHeader({
   eyebrow,
@@ -97,7 +96,7 @@ export function Chip({
   const tones = {
     neutral: "border-border bg-secondary/70 text-muted-foreground",
     primary: "border-primary/25 bg-primary-soft/70 text-primary",
-    gold: "border-gold/40 bg-gold-soft text-[oklch(0.5_0.11_82)]",
+    gold: "border-gold/45 foil text-[oklch(0.46_0.1_82)]",
     success: "border-success/25 bg-success/10 text-success",
   }[tone];
   return (
@@ -129,11 +128,13 @@ export function Btn({
   title?: string;
 }) {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35";
+    "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
   const sizes = size === "sm" ? "h-9 px-3.5 text-[12.5px]" : "h-10 px-4 text-[13.5px]";
   const variants = {
-    primary: "bg-primary text-primary-foreground shadow-card hover:bg-primary/90",
-    secondary: "border border-input bg-card text-foreground hover:bg-secondary",
+    primary:
+      "brand-gradient text-primary-foreground shadow-raise hover:shadow-glow hover:brightness-[1.06]",
+    secondary:
+      "border border-border bg-card text-foreground shadow-card hover:border-border-strong hover:bg-secondary/70",
     soft: "bg-primary-soft/80 text-primary hover:bg-primary-soft",
     ghost: "text-muted-foreground hover:bg-secondary hover:text-foreground",
     danger: "border border-destructive/30 bg-card text-destructive hover:bg-destructive/10",
@@ -150,6 +151,7 @@ export function Btn({
     </button>
   );
 }
+
 
 /** Small labelled dropdown used across the filter bar and editors. */
 export function Field({
@@ -239,26 +241,35 @@ export function ResultTile({
 }) {
   return (
     <div
-      className={`rounded-xl border px-4 py-3.5 ${
-        emphasis ? "border-primary/25 bg-primary-soft/25" : "border-border bg-card"
+      className={`premium-panel edge-sheen relative flex min-h-[148px] flex-col overflow-hidden rounded-2xl px-4 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-float ${
+        emphasis ? "border-primary/25 bg-gradient-to-br from-primary-soft/60 to-card" : ""
       }`}
     >
+      {emphasis && (
+        <span className="absolute inset-x-0 top-0 h-[2px] bg-primary/70" aria-hidden />
+      )}
       <div className="flex items-start gap-1.5">
-        <p className="text-[11.5px] leading-tight font-medium text-muted-foreground">{label}</p>
+        <p className="text-[10.5px] leading-[1.35] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+          {label}
+        </p>
         {method && <InfoTip>{method}</InfoTip>}
       </div>
-      <p className="mt-1.5 text-[22px] leading-none font-semibold tracking-[-0.025em] text-foreground">
+      <p className="mt-2.5 text-[26px] leading-none font-semibold tracking-[-0.035em] text-foreground tabular-nums">
         {value}
       </p>
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-        {delta && <DeltaTag delta={delta} suffix="vs previous" />}
-      </div>
+      {delta && (
+        <p className="mt-2">
+          <DeltaTag delta={delta} suffix="vs prev" />
+        </p>
+      )}
       {context && (
-        <p className="mt-1 text-[11.5px] leading-snug text-muted-foreground">{context}</p>
+        <p className="mt-auto pt-2 text-[11px] leading-snug text-muted-foreground">{context}</p>
       )}
     </div>
   );
 }
+
+
 
 export function EmptyState({
   title,
@@ -270,7 +281,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border-strong bg-primary-soft/25 px-6 py-10 text-center">
+    <div className="rounded-3xl border border-dashed border-border-strong bg-gradient-to-b from-primary-soft/40 to-card px-6 py-12 text-center">
       <p className="text-[15px] font-semibold text-foreground">{title}</p>
       <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-muted-foreground">
         {body}
@@ -297,7 +308,7 @@ export function DataPoint({
   icon?: LucideIcon;
 }) {
   return (
-    <div className="rounded-xl border border-border/70 bg-secondary/40 px-3.5 py-3">
+    <div className="rounded-xl border border-border/70 bg-gradient-to-b from-secondary/60 to-secondary/25 px-3.5 py-3">
       <div className="flex items-center gap-1.5">
         {Icon && <Icon className="size-3 shrink-0 text-muted-foreground" strokeWidth={2} />}
         <p className="truncate text-[10.5px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
@@ -329,7 +340,7 @@ export function Metric({
   delta?: Delta;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card px-4 py-3.5">
+    <div className="rounded-2xl border border-border bg-card px-4 py-4 shadow-card transition-shadow hover:shadow-raise">
       <p className="text-[11.5px] leading-tight font-medium text-muted-foreground">{label}</p>
       <p className="mt-1.5 text-[20px] leading-none font-semibold tracking-[-0.02em] text-foreground">
         {value}
