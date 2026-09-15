@@ -1,30 +1,33 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
+  Activity,
   ArrowRight,
   Check,
   ChevronDown,
   Clock,
   Eye,
+  Gift,
   Info,
   Mail,
   MessageSquare,
-  Tag,
+  MousePointerClick,
+  Pause,
+  Pencil,
+  PhoneCall,
+  Play,
+  Reply,
 } from "lucide-react";
 
 import { useState } from "react";
 import type { Stage } from "@/components/ota/journey";
-import { segmentShort } from "@/components/ota/segments";
 import { stageCardMetrics, stageJourneyPerformance } from "@/components/ota/analytics";
-import { stageOpportunity } from "@/components/ota/opportunity";
-import { OpportunityLine } from "@/components/ota/OpportunityCard";
 import { persona } from "@/components/ota/personality";
 import { timingAnchors, timingLabel, type TimingUnit } from "@/components/ota/stage-config";
 import { useOta } from "@/components/ota/state";
 import { useScale } from "@/components/ota/scale";
 import { StagePreview } from "@/components/ota/StagePreview";
-import { fill } from "@/components/ota/previews";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Btn, Chip, DataPoint, DeltaTag, Field, SectionHeading } from "@/components/ota/ui";
+import { Btn, DeltaTag, Field, SectionHeading } from "@/components/ota/ui";
 
 const title = "Guest journey — OTA Buster | Directful";
 const description =
@@ -104,13 +107,15 @@ function TimingPill({ stageId, first }: { stageId: string; first?: boolean }) {
 
 function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }) {
   const navigate = useNavigate();
+  const { configs } = useOta();
   const scale = useScale();
+  const [paused, setPaused] = useState(false);
   const isText = stage.message.channel === "Text";
   const look = persona(stage.id);
   const Icon = look.icon;
-  const opportunity = stageOpportunity(stage.id);
   const metrics = stageCardMetrics[stage.id] ?? [];
   const perf = stageJourneyPerformance[stage.id];
+  const timing = configs[stage.id]?.timing;
   const open = () => navigate({ to: "/ota-buster/stage/$stageId", params: { stageId: stage.id } });
 
   // "14.5% engagement" → a confident number with a quiet label beneath it.
@@ -118,10 +123,15 @@ function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }
   const rateValue = rateParts[0] ?? "";
   const rateLabel = rateParts.slice(1).join(" ") || "conversion rate";
 
-  const line = fill(
-    isText ? stage.message.body.split("\n\n")[0]! : stage.message.subject,
-    stage.offers[0]?.name,
-  );
+  const audienceMetric = metrics.find((metric) => metric.label === "Guests reached") ?? metrics[0];
+  const engagementMetrics = perf
+    ? [
+        { label: rateLabel, value: rateValue, Icon: Activity, delta: perf.delta },
+        { label: "Clicks", value: perf.clicks, Icon: MousePointerClick },
+        { label: "Responses", value: perf.responses, Icon: Reply },
+        { label: "Calls made", value: perf.calls, Icon: PhoneCall },
+      ]
+    : [];
 
   return (
     <div
@@ -139,135 +149,124 @@ function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }
         aria-hidden
       />
 
-      <div className="relative px-5 py-4 sm:px-6 sm:py-5">
-        <div className="flex items-start gap-4">
-          <span
-            className={`grid size-10 shrink-0 place-items-center rounded-xl ${look.tile} shadow-card`}
-          >
-            <Icon className="size-[18px]" strokeWidth={2} />
-          </span>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-              <h3 className="text-[16px] font-semibold tracking-[-0.015em] text-foreground">
-                {stage.name}
-              </h3>
-              <span
-                className={`text-[10.5px] font-semibold tracking-[0.12em] uppercase ${look.ink}`}
-              >
-                {look.intent}
-              </span>
-              <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-muted-foreground">
-                {isText ? (
-                  <MessageSquare className="size-3" strokeWidth={2.2} />
-                ) : (
-                  <Mail className="size-3" strokeWidth={2.2} />
-                )}
-                {isText ? "Text" : "Email"}
-              </span>
-            </div>
-
-            <p className="mt-1 line-clamp-1 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
-              {line}
-            </p>
-
-            {/* Inline metadata — reads as a measurement strip, not five boxes. */}
-            <dl className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5">
-              {metrics.map((m) => (
-                <div key={m.label} className="flex items-baseline gap-1.5">
-                  <dt className="text-[11px] text-muted-foreground">{m.label}</dt>
-                  <dd className="text-[13px] font-semibold text-foreground tabular-nums">
-                    {scale.value(m.value)}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {stage.offers.length > 0 ? (
-                stage.offers.map((o) => (
-                  <Chip key={`${o.segment}-${o.id}`} tone="gold">
-                    <Tag className="size-3" strokeWidth={2.2} /> {o.name} · {segmentShort(o.segment)}
-                  </Chip>
-                ))
-              ) : (
-                <Chip>No offer attached</Chip>
-              )}
+      <div className="relative grid lg:grid-cols-[minmax(0,0.95fr)_minmax(380px,1.05fr)]">
+        <div className="p-5 sm:p-6">
+          <div className="flex items-start gap-4">
+            <span
+              className={`grid size-11 shrink-0 place-items-center rounded-xl ${look.tile} shadow-card`}
+            >
+              <Icon className="size-5" strokeWidth={2} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h3 className="text-[18px] font-semibold text-foreground">{stage.name}</h3>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/65 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+                  {isText ? <MessageSquare className="size-3" /> : <Mail className="size-3" />}
+                  {stage.message.channel}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border-strong px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                  <Gift className="size-3" />
+                  {stage.offers[0]?.name ?? "No offer attached"}
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1.5 text-[11px] font-semibold ${paused ? "text-muted-foreground" : "text-success"}`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${paused ? "bg-border-strong" : "bg-success"}`}
+                  />
+                  {paused ? "Paused" : "Live"}
+                </span>
+              </div>
+              <p className="mt-1.5 text-[12px] font-medium text-muted-foreground">
+                {timing ? timingLabel(timing) : stage.message.timing}
+              </p>
             </div>
           </div>
 
-          {/* Performance rides on the right edge: one confident number. */}
-          <div className="hidden w-[168px] shrink-0 flex-col items-end gap-2 border-l border-border/70 pl-5 sm:flex">
-            {perf && (
-              <div className="text-right">
-                <p className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-                  {rateLabel}
+          {audienceMetric && (
+            <div className="mt-5 flex items-end gap-2 border-y border-border/70 py-4">
+              <div>
+                <p className="text-[11px] font-medium text-muted-foreground">
+                  {audienceMetric.label}
                 </p>
-                <p className="mt-1 text-[28px] leading-none font-semibold tracking-[-0.03em] text-foreground tabular-nums">
-                  {rateValue}
-                </p>
-                <p className="mt-1.5">
-                  <DeltaTag delta={perf.delta} suffix="vs prev" />
+                <p className="mt-1 text-[30px] leading-none font-semibold text-foreground tabular-nums">
+                  {scale.value(audienceMetric.value)}
                 </p>
               </div>
-            )}
-            <div className="mt-1 flex items-center gap-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-              <Btn
-                variant="secondary"
-                size="sm"
-                onClick={(e) => {
-                  e?.stopPropagation();
-                  onPreview();
-                }}
-              >
-                <Eye className="size-3.5" strokeWidth={2} /> Preview
-              </Btn>
-              <Btn
-                size="sm"
-                onClick={(e) => {
-                  e?.stopPropagation();
-                  open();
-                }}
-              >
-                Open <ArrowRight className="size-3.5" strokeWidth={2.2} />
-              </Btn>
+              {audienceMetric.delta && <DeltaTag delta={audienceMetric.delta} suffix="vs prev" />}
             </div>
+          )}
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Btn
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e?.stopPropagation();
+                onPreview();
+              }}
+            >
+              <Eye className="size-3.5" /> Preview
+            </Btn>
+            <Btn
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e?.stopPropagation();
+                setPaused((value) => !value);
+              }}
+            >
+              {paused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}
+              {paused ? "Resume" : "Pause"}
+            </Btn>
+            <Btn
+              size="sm"
+              onClick={(e) => {
+                e?.stopPropagation();
+                open();
+              }}
+            >
+              <Pencil className="size-3.5" /> Edit campaign
+            </Btn>
           </div>
         </div>
 
-        {opportunity && (
-          <OpportunityLine
-            opportunity={opportunity}
-            onView={() =>
-              navigate({
-                to: "/ota-buster/stage/$stageId",
-                params: { stageId: stage.id },
-                search: { tab: "performance" },
-              })
-            }
-          />
-        )}
+        <div className="border-t border-border/70 bg-secondary/25 p-5 sm:p-6 lg:border-t-0 lg:border-l">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="text-[10.5px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+              Engagement
+            </p>
+            {perf && <DeltaTag delta={perf.delta} suffix="vs prev" />}
+          </div>
+          <dl className="grid grid-cols-2 gap-x-5 gap-y-4">
+            {engagementMetrics.map(({ label, value, Icon: MetricIcon, delta }, index) => (
+              <div
+                key={label}
+                className={`min-w-0 ${index % 2 === 1 ? "border-l border-border/70 pl-5" : ""}`}
+              >
+                <dt className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                  <MetricIcon className={`size-3.5 ${look.ink}`} strokeWidth={2} /> {label}
+                </dt>
+                <dd className="mt-1.5 flex items-baseline gap-2">
+                  <span className="text-[25px] leading-none font-semibold text-foreground tabular-nums">
+                    {scale.value(value)}
+                  </span>
+                  {delta && (
+                    <span className="text-[10.5px] font-semibold text-success">{delta.value}</span>
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4 sm:hidden">
-          <Btn
-            size="sm"
-            onClick={(e) => {
-              e?.stopPropagation();
-              open();
-            }}
-          >
-            Open stage <ArrowRight className="size-3.5" strokeWidth={2.2} />
-          </Btn>
-          <Btn
-            variant="secondary"
-            size="sm"
-            onClick={(e) => {
-              e?.stopPropagation();
-              onPreview();
-            }}
-          >
-            <Eye className="size-3.5" strokeWidth={2} /> Preview
-          </Btn>
+        <div className="flex items-center justify-between gap-3 border-t border-border/70 bg-card px-5 py-3 lg:col-span-2 sm:px-6">
+          <p className="text-[11.5px] text-muted-foreground">
+            Updated {stage.editors[0]?.when ?? "recently"}
+          </p>
+          <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+            View details <ArrowRight className="size-3.5" />
+          </span>
         </div>
       </div>
     </div>
@@ -295,7 +294,6 @@ function JourneyPage() {
           </div>
         ))}
       </div>
-
 
       <div className="premium-panel edge-sheen mx-auto w-full max-w-[920px] p-4">
         <button
