@@ -507,92 +507,91 @@ export const stageMetrics: Record<string, StageMetric[]> = {
   ],
 };
 
-/** The 3–4 numbers shown on a stage card in the journey. */
-export const stageCardMetrics: Record<string, StageMetric[]> = {
-  "just-booked": [
-    { label: "Guests reached", value: "8,240" },
-    { label: "Click-through rate", value: "14.5%" },
-    { label: "Guest profiles captured", value: "3,218" },
-    { label: "Google one-tap sign-ins", value: "1,842" },
-  ],
-  "pre-checkin": [
-    { label: "Guests reached", value: "6,480" },
-    { label: "Click-through rate", value: "15.8%" },
-    { label: "Google one-tap sign-ins", value: "1,406" },
-    { label: "Direct revenue", value: "$9,860" },
-  ],
-  reminder: [
-    { label: "Guests reached", value: "5,120" },
-    { label: "Click-through rate", value: "14.5%" },
-    { label: "Google one-tap sign-ins", value: "612" },
-    { label: "Direct conversions", value: "48" },
-  ],
-  "during-stay": [
-    { label: "Guests reached", value: "4,260" },
-    { label: "Offer engagement", value: "18.4%" },
-    { label: "Google one-tap sign-ins", value: "884" },
-    { label: "Direct revenue", value: "$12,420" },
-  ],
-  "post-checkout": [
-    { label: "Guests reached", value: "3,840" },
-    { label: "Reviews generated", value: "618" },
-    { label: "Google one-tap sign-ins", value: "742" },
-    { label: "Direct revenue", value: "$18,620" },
-  ],
-  winback: [
-    { label: "Guests reached", value: "2,960" },
-    { label: "Direct conversions", value: "204" },
-    { label: "Google one-tap sign-ins", value: "508" },
-    { label: "Direct revenue", value: "$30,920" },
-  ],
+export type ChannelEngagement = {
+  engaged: string;
+  clicks: string;
+  responses: string;
+  calls: string;
 };
 
-/** Contextual journey performance line rendered on each stage card. */
-export const stageJourneyPerformance: Record<
-  string,
-  { rate: string; delta: Delta; calls: string; clicks: string; responses: string }
-> = {
+/**
+ * The journey card's stat model. Three main sets — guests reached,
+ * click-through rate and engagement — with clicks, responses and calls as
+ * subsets of engagement, plus the full channel breakdown for the details popup.
+ */
+export type StageJourneyStats = {
+  reach: { total: string; email: string; phone: string; delta?: Delta };
+  ctr: { value: string; clicks: string; delta?: Delta };
+  engagement: { rate: string; delta?: Delta; email: ChannelEngagement; phone: ChannelEngagement };
+  collected: { email: string; phone: string; address: string };
+};
+
+export const stageJourneyStats: Record<string, StageJourneyStats> = {
   "just-booked": {
-    rate: "14.5% engagement",
-    delta: { value: "+1.2pt", direction: "up" },
-    calls: "186",
-    clicks: "1,196",
-    responses: "428",
+    reach: { total: "8,240", email: "5,760", phone: "2,480", delta: { value: "+4.2%", direction: "up" } },
+    ctr: { value: "14.5%", clicks: "1,196", delta: { value: "+1.2pt", direction: "up" } },
+    engagement: {
+      rate: "11.8%",
+      delta: { value: "+1.2pt", direction: "up" },
+      email: { engaged: "812", clicks: "842", responses: "296", calls: "74" },
+      phone: { engaged: "162", clicks: "354", responses: "132", calls: "112" },
+    },
+    collected: { email: "6,020", phone: "4,180", address: "2,340" },
   },
   "pre-checkin": {
-    rate: "15.8% engagement",
-    delta: { value: "+2.4pt", direction: "up" },
-    calls: "142",
-    clicks: "1,024",
-    responses: "516",
+    reach: { total: "6,480", email: "4,620", phone: "1,860", delta: { value: "+3.4%", direction: "up" } },
+    ctr: { value: "15.8%", clicks: "1,024", delta: { value: "+2.4pt", direction: "up" } },
+    engagement: {
+      rate: "12.6%",
+      delta: { value: "+2.4pt", direction: "up" },
+      email: { engaged: "690", clicks: "728", responses: "342", calls: "48" },
+      phone: { engaged: "126", clicks: "296", responses: "174", calls: "94" },
+    },
+    collected: { email: "4,940", phone: "3,120", address: "1,760" },
   },
   reminder: {
-    rate: "14.5% engagement",
-    delta: { value: "-1.1pt", direction: "down" },
-    calls: "74",
-    clicks: "742",
-    responses: "391",
+    reach: { total: "5,120", email: "1,240", phone: "3,880" },
+    ctr: { value: "14.5%", clicks: "742", delta: { value: "-1.1pt", direction: "down" } },
+    engagement: {
+      rate: "16.2%",
+      delta: { value: "-1.1pt", direction: "down" },
+      email: { engaged: "58", clicks: "148", responses: "62", calls: "12" },
+      phone: { engaged: "544", clicks: "594", responses: "329", calls: "62" },
+    },
+    collected: { email: "3,140", phone: "4,690", address: "1,208" },
   },
   "during-stay": {
-    rate: "18.4% offer engagement",
-    delta: { value: "+2.8pt", direction: "up" },
-    calls: "231",
-    clicks: "784",
-    responses: "612",
+    reach: { total: "4,260", email: "2,140", phone: "2,120" },
+    ctr: { value: "16.2%", clicks: "690", delta: { value: "+1.8pt", direction: "up" } },
+    engagement: {
+      rate: "18.4%",
+      delta: { value: "+2.8pt", direction: "up" },
+      email: { engaged: "402", clicks: "322", responses: "288", calls: "36" },
+      phone: { engaged: "382", clicks: "368", responses: "324", calls: "195" },
+    },
+    collected: { email: "2,780", phone: "2,410", address: "986" },
   },
   "post-checkout": {
-    rate: "3.9% conversion",
-    delta: { value: "+0.6pt", direction: "up" },
-    calls: "96",
-    clicks: "824",
-    responses: "618",
+    reach: { total: "3,840", email: "2,760", phone: "1,080" },
+    ctr: { value: "21.5%", clicks: "824", delta: { value: "+2.2pt", direction: "up" } },
+    engagement: {
+      rate: "22.4%",
+      delta: { value: "+0.6pt", direction: "up" },
+      email: { engaged: "618", clicks: "612", responses: "486", calls: "22" },
+      phone: { engaged: "242", clicks: "212", responses: "132", calls: "74" },
+    },
+    collected: { email: "3,050", phone: "1,960", address: "1,140" },
   },
   winback: {
-    rate: "6.9% conversion",
-    delta: { value: "+1.1pt", direction: "up" },
-    calls: "118",
-    clicks: "684",
-    responses: "204",
+    reach: { total: "2,960", email: "2,220", phone: "740" },
+    ctr: { value: "23.1%", clicks: "684", delta: { value: "+3.8pt", direction: "up" } },
+    engagement: {
+      rate: "14.9%",
+      delta: { value: "+1.1pt", direction: "up" },
+      email: { engaged: "331", clicks: "528", responses: "164", calls: "18" },
+      phone: { engaged: "110", clicks: "156", responses: "40", calls: "100" },
+    },
+    collected: { email: "2,210", phone: "1,320", address: "760" },
   },
 };
 
