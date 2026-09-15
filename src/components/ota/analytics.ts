@@ -528,7 +528,12 @@ export type StageJourneyStats = {
 
 export const stageJourneyStats: Record<string, StageJourneyStats> = {
   "just-booked": {
-    reach: { total: "8,240", email: "5,760", phone: "2,480", delta: { value: "+4.2%", direction: "up" } },
+    reach: {
+      total: "8,240",
+      email: "5,760",
+      phone: "2,480",
+      delta: { value: "+4.2%", direction: "up" },
+    },
     ctr: { value: "14.5%", clicks: "1,196", delta: { value: "+1.2pt", direction: "up" } },
     engagement: {
       rate: "11.8%",
@@ -539,7 +544,12 @@ export const stageJourneyStats: Record<string, StageJourneyStats> = {
     collected: { email: "6,020", phone: "4,180", address: "2,340" },
   },
   "pre-checkin": {
-    reach: { total: "6,480", email: "4,620", phone: "1,860", delta: { value: "+3.4%", direction: "up" } },
+    reach: {
+      total: "6,480",
+      email: "4,620",
+      phone: "1,860",
+      delta: { value: "+3.4%", direction: "up" },
+    },
     ctr: { value: "15.8%", clicks: "1,024", delta: { value: "+2.4pt", direction: "up" } },
     engagement: {
       rate: "12.6%",

@@ -198,7 +198,10 @@ function StatsModal({
           </div>
         </ModalSection>
 
-        <ModalSection label="Guests reached" hint={`${scale.value(stats.reach.total)} guests in total`}>
+        <ModalSection
+          label="Guests reached"
+          hint={`${scale.value(stats.reach.total)} guests in total`}
+        >
           <div className="space-y-3.5">
             {reachChannels.map(({ label, Icon: ChannelIcon, value }) => (
               <div key={label}>
@@ -302,7 +305,9 @@ function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }
           <span
             className={`inline-flex items-center gap-1.5 text-[11.5px] font-semibold ${paused ? "text-muted-foreground" : "text-success"}`}
           >
-            <span className={`size-1.5 rounded-full ${paused ? "bg-border-strong" : "bg-success"}`} />
+            <span
+              className={`size-1.5 rounded-full ${paused ? "bg-border-strong" : "bg-success"}`}
+            />
             {paused ? "Paused" : "Live"}
           </span>
           <span className="ml-auto inline-flex items-center gap-1.5 text-[12.5px] font-medium text-muted-foreground">
@@ -330,14 +335,14 @@ function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }
             delta={stats?.ctr.delta}
           >
             {stats && (
-              <SubStat Icon={MousePointerClick} value={scale.value(stats.ctr.clicks)} label="clicks" />
+              <SubStat
+                Icon={MousePointerClick}
+                value={scale.value(stats.ctr.clicks)}
+                label="clicks"
+              />
             )}
           </StatTier>
-          <StatTier
-            label="Engagement"
-            value={engagement?.rate ?? "—"}
-            delta={engagement?.delta}
-          >
+          <StatTier label="Engagement" value={engagement?.rate ?? "—"} delta={engagement?.delta}>
             {engagement && (
               <>
                 <SubStat
@@ -400,11 +405,7 @@ function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }
         </div>
       </div>
 
-      <StatsModal
-        stage={stage}
-        open={detailsOpen}
-        onOpenChange={setDetailsOpen}
-      />
+      <StatsModal stage={stage} open={detailsOpen} onOpenChange={setDetailsOpen} />
     </div>
   );
 }
