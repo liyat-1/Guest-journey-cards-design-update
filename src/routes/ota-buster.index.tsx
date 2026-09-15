@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Clock,
   Eye,
+  Gift,
   Info,
   Mail,
   MessageSquare,
@@ -106,6 +107,7 @@ function TimingPill({ stageId, first }: { stageId: string; first?: boolean }) {
 
 function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }) {
   const navigate = useNavigate();
+  const { configs } = useOta();
   const scale = useScale();
   const [paused, setPaused] = useState(false);
   const isText = stage.message.channel === "Text";
@@ -113,6 +115,7 @@ function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }
   const Icon = look.icon;
   const metrics = stageCardMetrics[stage.id] ?? [];
   const perf = stageJourneyPerformance[stage.id];
+  const timing = configs[stage.id]?.timing;
   const open = () => navigate({ to: "/ota-buster/stage/$stageId", params: { stageId: stage.id } });
 
   // "14.5% engagement" → a confident number with a quiet label beneath it.
@@ -159,12 +162,18 @@ function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }
                   {isText ? <MessageSquare className="size-3" /> : <Mail className="size-3" />}
                   {stage.message.channel}
                 </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border-strong px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                  <Gift className="size-3" />
+                  {stage.offers[0]?.name ?? "No offer attached"}
+                </span>
                 <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold ${paused ? "text-muted-foreground" : "text-success"}`}>
                   <span className={`size-1.5 rounded-full ${paused ? "bg-border-strong" : "bg-success"}`} />
                   {paused ? "Paused" : "Live"}
                 </span>
               </div>
-              <p className="mt-1.5 text-[12px] font-medium text-muted-foreground">{timingLabel(useOta().configs[stage.id]?.timing ?? { amount: 0, unit: "minutes", anchor: "custom", note: stage.message.timing })}</p>
+              <p className="mt-1.5 text-[12px] font-medium text-muted-foreground">
+                {timing ? timingLabel(timing) : stage.message.timing}
+              </p>
             </div>
           </div>
 
@@ -221,27 +230,6 @@ function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-t border-border p-4 lg:hidden">
-          <Btn
-            size="sm"
-            onClick={(e) => {
-              e?.stopPropagation();
-              open();
-            }}
-          >
-            Open stage <ArrowRight className="size-3.5" strokeWidth={2.2} />
-          </Btn>
-          <Btn
-            variant="secondary"
-            size="sm"
-            onClick={(e) => {
-              e?.stopPropagation();
-              onPreview();
-            }}
-          >
-            <Eye className="size-3.5" strokeWidth={2} /> Preview
-          </Btn>
-        </div>
       </div>
     </div>
   );
