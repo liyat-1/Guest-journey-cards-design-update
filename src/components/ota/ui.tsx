@@ -129,7 +129,7 @@ export function Btn({
 }) {
   const base =
     "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-  const sizes = size === "sm" ? "h-9 px-3.5 text-[12.5px]" : "h-10 px-4 text-[13.5px]";
+  const sizes = size === "sm" ? "h-10 px-4 text-[13px]" : "h-11 px-5 text-[14px]";
   const variants = {
     primary:
       "brand-gradient text-primary-foreground shadow-raise hover:shadow-glow hover:brightness-[1.06]",
