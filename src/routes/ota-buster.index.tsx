@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  Activity,
-  ArrowRight,
+  BarChart3,
   Check,
   ChevronDown,
   Clock,
@@ -9,25 +8,28 @@ import {
   Gift,
   Info,
   Mail,
+  MapPin,
   MessageSquare,
   MousePointerClick,
   Pause,
   Pencil,
+  Phone,
   PhoneCall,
   Play,
   Reply,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { Stage } from "@/components/ota/journey";
-import { stageCardMetrics, stageJourneyPerformance } from "@/components/ota/analytics";
+import { stageJourneyStats, type Delta } from "@/components/ota/analytics";
 import { persona } from "@/components/ota/personality";
 import { timingAnchors, timingLabel, type TimingUnit } from "@/components/ota/stage-config";
 import { useOta } from "@/components/ota/state";
 import { useScale } from "@/components/ota/scale";
 import { StagePreview } from "@/components/ota/StagePreview";
+import { Modal, ModalSection } from "@/components/ota/Modal";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Btn, DeltaTag, Field, SectionHeading } from "@/components/ota/ui";
+import { Bar, Btn, DataPoint, DeltaTag, SectionHeading } from "@/components/ota/ui";
 
 const title = "Guest journey — OTA Buster | Directful";
 const description =
