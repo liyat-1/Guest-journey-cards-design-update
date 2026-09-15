@@ -548,13 +548,52 @@ export const stageCardMetrics: Record<string, StageMetric[]> = {
 };
 
 /** Contextual journey performance line rendered on each stage card. */
-export const stageJourneyPerformance: Record<string, { rate: string; delta: Delta }> = {
-  "just-booked": { rate: "14.5% engagement", delta: { value: "+1.2pt", direction: "up" } },
-  "pre-checkin": { rate: "15.8% engagement", delta: { value: "+2.4pt", direction: "up" } },
-  reminder: { rate: "14.5% engagement", delta: { value: "-1.1pt", direction: "down" } },
-  "during-stay": { rate: "18.4% offer engagement", delta: { value: "+2.8pt", direction: "up" } },
-  "post-checkout": { rate: "3.9% conversion", delta: { value: "+0.6pt", direction: "up" } },
-  winback: { rate: "6.9% conversion", delta: { value: "+1.1pt", direction: "up" } },
+export const stageJourneyPerformance: Record<
+  string,
+  { rate: string; delta: Delta; calls: string; clicks: string; responses: string }
+> = {
+  "just-booked": {
+    rate: "14.5% engagement",
+    delta: { value: "+1.2pt", direction: "up" },
+    calls: "186",
+    clicks: "1,196",
+    responses: "428",
+  },
+  "pre-checkin": {
+    rate: "15.8% engagement",
+    delta: { value: "+2.4pt", direction: "up" },
+    calls: "142",
+    clicks: "1,024",
+    responses: "516",
+  },
+  reminder: {
+    rate: "14.5% engagement",
+    delta: { value: "-1.1pt", direction: "down" },
+    calls: "74",
+    clicks: "742",
+    responses: "391",
+  },
+  "during-stay": {
+    rate: "18.4% offer engagement",
+    delta: { value: "+2.8pt", direction: "up" },
+    calls: "231",
+    clicks: "784",
+    responses: "612",
+  },
+  "post-checkout": {
+    rate: "3.9% conversion",
+    delta: { value: "+0.6pt", direction: "up" },
+    calls: "96",
+    clicks: "824",
+    responses: "618",
+  },
+  winback: {
+    rate: "6.9% conversion",
+    delta: { value: "+1.1pt", direction: "up" },
+    calls: "118",
+    clicks: "684",
+    responses: "204",
+  },
 };
 
 /** Lightweight optimisation guidance per stage. */
