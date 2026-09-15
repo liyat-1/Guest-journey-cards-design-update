@@ -33,7 +33,6 @@ export function Panel({ children, className = "" }: { children: ReactNode; class
   );
 }
 
-
 export function PanelHeader({
   eyebrow,
   title,
@@ -129,7 +128,7 @@ export function Btn({
 }) {
   const base =
     "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-  const sizes = size === "sm" ? "h-9 px-3.5 text-[12.5px]" : "h-10 px-4 text-[13.5px]";
+  const sizes = size === "sm" ? "h-10 px-4 text-[13px]" : "h-11 px-5 text-[14px]";
   const variants = {
     primary:
       "brand-gradient text-primary-foreground shadow-raise hover:shadow-glow hover:brightness-[1.06]",
@@ -151,7 +150,6 @@ export function Btn({
     </button>
   );
 }
-
 
 /** Small labelled dropdown used across the filter bar and editors. */
 export function Field({
@@ -245,9 +243,7 @@ export function ResultTile({
         emphasis ? "border-primary/25 bg-gradient-to-br from-primary-soft/60 to-card" : ""
       }`}
     >
-      {emphasis && (
-        <span className="absolute inset-x-0 top-0 h-[2px] bg-primary/70" aria-hidden />
-      )}
+      {emphasis && <span className="absolute inset-x-0 top-0 h-[2px] bg-primary/70" aria-hidden />}
       <div className="flex items-start gap-1.5">
         <p className="text-[10.5px] leading-[1.35] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
           {label}
@@ -268,8 +264,6 @@ export function ResultTile({
     </div>
   );
 }
-
-
 
 export function EmptyState({
   title,
