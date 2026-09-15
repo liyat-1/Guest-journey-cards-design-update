@@ -107,43 +107,175 @@ function TimingPill({ stageId, first }: { stageId: string; first?: boolean }) {
   );
 }
 
+/** Sums formatted count strings ("1,196") into a formatted total. */
+const sum = (...values: string[]) =>
+  values.reduce((total, v) => total + Number(v.replace(/,/g, "")), 0).toLocaleString("en-US");
+
+/** One main metric on the card: quiet label, confident number, small detail line. */
+function StatTier({
+  label,
+  value,
+  delta,
+  children,
+}: {
+  label: string;
+  value: string;
+  delta?: Delta;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="min-w-0 px-4 py-4 sm:px-5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+          {label}
+        </p>
+        {delta && <DeltaTag delta={delta} />}
+      </div>
+      <p className="mt-2 text-[28px] leading-none font-semibold tracking-[-0.025em] text-foreground tabular-nums">
+        {value}
+      </p>
+      {children && (
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-1">{children}</div>
+      )}
+    </div>
+  );
+}
+
+/** Small inline figure inside a stat tier: icon, bold number, quiet label. */
+function SubStat({ Icon, value, label }: { Icon: typeof Mail; value: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground">
+      <Icon className="size-3.5 shrink-0" strokeWidth={2} />
+      <span className="font-semibold text-foreground tabular-nums">{value}</span> {label}
+    </span>
+  );
+}
+
+/** Full breakdown behind "See details": collected details, reach and engagement by channel. */
+function StatsModal({
+  stage,
+  open,
+  onOpenChange,
+}: {
+  stage: Stage;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  const scale = useScale();
+  const stats = stageJourneyStats[stage.id];
+  const look = persona(stage.id);
+  if (!stats) return null;
+
+  const asNumber = (v: string) => Number(v.replace(/,/g, ""));
+  const reachChannels = [
+    { label: "Via email", Icon: Mail, value: stats.reach.email },
+    { label: "Via text (SMS)", Icon: MessageSquare, value: stats.reach.phone },
+  ];
+  const engagementChannels = [
+    { label: "Via email", Icon: Mail, data: stats.engagement.email },
+    { label: "Via text (SMS)", Icon: MessageSquare, data: stats.engagement.phone },
+  ];
+
+  return (
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      size="md"
+      icon={look.icon}
+      eyebrow={stage.name}
+      title="Full performance breakdown"
+      description="What this stage collected, who it reached and how guests engaged — split by channel."
+    >
+      <div className="space-y-4 p-5 sm:p-6">
+        <ModalSection
+          label="Guest information collected"
+          hint="Contact details captured from guests interacting with this stage."
+        >
+          <div className="grid gap-3 sm:grid-cols-3">
+            <DataPoint icon={Mail} label="Email" value={scale.value(stats.collected.email)} />
+            <DataPoint icon={Phone} label="Phone" value={scale.value(stats.collected.phone)} />
+            <DataPoint icon={MapPin} label="Address" value={scale.value(stats.collected.address)} />
+          </div>
+        </ModalSection>
+
+        <ModalSection label="Guests reached" hint={`${scale.value(stats.reach.total)} guests in total`}>
+          <div className="space-y-3.5">
+            {reachChannels.map(({ label, Icon: ChannelIcon, value }) => (
+              <div key={label}>
+                <div className="flex items-center justify-between text-[13px]">
+                  <span className="inline-flex items-center gap-1.5 font-medium text-muted-foreground">
+                    <ChannelIcon className="size-3.5" strokeWidth={2} /> {label}
+                  </span>
+                  <span className="font-semibold text-foreground tabular-nums">
+                    {scale.value(value)}
+                  </span>
+                </div>
+                <div className="mt-1.5">
+                  <Bar value={asNumber(value)} max={asNumber(stats.reach.total)} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </ModalSection>
+
+        <ModalSection
+          label="Engagement by channel"
+          hint="Guests who engaged, with their clicks, responses and calls."
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            {engagementChannels.map(({ label, Icon: ChannelIcon, data }) => (
+              <div key={label} className="rounded-xl border border-border/70 bg-secondary/25 p-4">
+                <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground">
+                  <ChannelIcon className="size-3.5" strokeWidth={2} /> {label}
+                </span>
+                <div className="mt-2 flex items-baseline gap-1.5">
+                  <p className="text-[26px] leading-none font-semibold tracking-[-0.025em] text-foreground tabular-nums">
+                    {scale.value(data.engaged)}
+                  </p>
+                  <p className="text-[11.5px] text-muted-foreground">engaged</p>
+                </div>
+                <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-border/70 pt-3">
+                  {(
+                    [
+                      ["Clicks", data.clicks],
+                      ["Responses", data.responses],
+                      ["Calls", data.calls],
+                    ] as const
+                  ).map(([label, value]) => (
+                    <div key={label}>
+                      <dt className="text-[10.5px] font-medium text-muted-foreground">{label}</dt>
+                      <dd className="mt-0.5 text-[15px] font-semibold text-foreground tabular-nums">
+                        {scale.value(value)}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ))}
+          </div>
+        </ModalSection>
+      </div>
+    </Modal>
+  );
+}
+
 function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }) {
   const navigate = useNavigate();
   const { configs } = useOta();
   const scale = useScale();
   const [paused, setPaused] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const isText = stage.message.channel === "Text";
   const look = persona(stage.id);
   const Icon = look.icon;
-  const metrics = stageCardMetrics[stage.id] ?? [];
-  const perf = stageJourneyPerformance[stage.id];
+  const stats = stageJourneyStats[stage.id];
   const timing = configs[stage.id]?.timing;
   const open = () => navigate({ to: "/ota-buster/stage/$stageId", params: { stageId: stage.id } });
-
-  // "14.5% engagement" → a confident number with a quiet label beneath it.
-  const rateParts = perf ? scale.value(perf.rate).split(" ") : [];
-  const rateValue = rateParts[0] ?? "";
-  const rateLabel = rateParts.slice(1).join(" ") || "conversion rate";
-
-  const audienceMetric = metrics.find((metric) => metric.label === "Guests reached") ?? metrics[0];
-  const engagementMetrics = perf
-    ? [
-        { label: rateLabel, value: rateValue, Icon: Activity, delta: perf.delta },
-        { label: "Clicks", value: perf.clicks, Icon: MousePointerClick },
-        { label: "Responses", value: perf.responses, Icon: Reply },
-        { label: "Calls made", value: perf.calls, Icon: PhoneCall },
-      ]
-    : [];
+  const engagement = stats?.engagement;
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={open}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") open();
-      }}
-      className={`premium-panel edge-sheen group cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-float ${look.edge}`}
+      className={`premium-panel edge-sheen group relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-float ${look.edge}`}
     >
       <span className={`absolute inset-y-0 left-0 w-[3px] ${look.rail}`} aria-hidden />
       <span
@@ -151,126 +283,128 @@ function StageCard({ stage, onPreview }: { stage: Stage; onPreview: () => void }
         aria-hidden
       />
 
-      <div className="relative grid lg:grid-cols-[minmax(0,0.95fr)_minmax(380px,1.05fr)]">
-        <div className="p-5 sm:p-6">
-          <div className="flex items-start gap-4">
-            <span
-              className={`grid size-11 shrink-0 place-items-center rounded-xl ${look.tile} shadow-card`}
-            >
-              <Icon className="size-5" strokeWidth={2} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h3 className="text-[18px] font-semibold text-foreground">{stage.name}</h3>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/65 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
-                  {isText ? <MessageSquare className="size-3" /> : <Mail className="size-3" />}
-                  {stage.message.channel}
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border-strong px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-                  <Gift className="size-3" />
-                  {stage.offers[0]?.name ?? "No offer attached"}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 text-[11px] font-semibold ${paused ? "text-muted-foreground" : "text-success"}`}
-                >
-                  <span
-                    className={`size-1.5 rounded-full ${paused ? "bg-border-strong" : "bg-success"}`}
-                  />
-                  {paused ? "Paused" : "Live"}
-                </span>
-              </div>
-              <p className="mt-1.5 text-[12px] font-medium text-muted-foreground">
-                {timing ? timingLabel(timing) : stage.message.timing}
-              </p>
-            </div>
-          </div>
-
-          {audienceMetric && (
-            <div className="mt-5 flex items-end gap-2 border-y border-border/70 py-4">
-              <div>
-                <p className="text-[11px] font-medium text-muted-foreground">
-                  {audienceMetric.label}
-                </p>
-                <p className="mt-1 text-[30px] leading-none font-semibold text-foreground tabular-nums">
-                  {scale.value(audienceMetric.value)}
-                </p>
-              </div>
-              {audienceMetric.delta && <DeltaTag delta={audienceMetric.delta} suffix="vs prev" />}
-            </div>
-          )}
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Btn
-              variant="secondary"
-              size="sm"
-              onClick={(e) => {
-                e?.stopPropagation();
-                onPreview();
-              }}
-            >
-              <Eye className="size-3.5" /> Preview
-            </Btn>
-            <Btn
-              variant="secondary"
-              size="sm"
-              onClick={(e) => {
-                e?.stopPropagation();
-                setPaused((value) => !value);
-              }}
-            >
-              {paused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}
-              {paused ? "Resume" : "Pause"}
-            </Btn>
-            <Btn
-              size="sm"
-              onClick={(e) => {
-                e?.stopPropagation();
-                open();
-              }}
-            >
-              <Pencil className="size-3.5" /> Edit campaign
-            </Btn>
-          </div>
-        </div>
-
-        <div className="border-t border-border/70 bg-secondary/25 p-5 sm:p-6 lg:border-t-0 lg:border-l">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-[10.5px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-              Engagement
-            </p>
-            {perf && <DeltaTag delta={perf.delta} suffix="vs prev" />}
-          </div>
-          <dl className="grid grid-cols-2 gap-x-5 gap-y-4">
-            {engagementMetrics.map(({ label, value, Icon: MetricIcon, delta }, index) => (
-              <div
-                key={label}
-                className={`min-w-0 ${index % 2 === 1 ? "border-l border-border/70 pl-5" : ""}`}
-              >
-                <dt className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
-                  <MetricIcon className={`size-3.5 ${look.ink}`} strokeWidth={2} /> {label}
-                </dt>
-                <dd className="mt-1.5 flex items-baseline gap-2">
-                  <span className="text-[25px] leading-none font-semibold text-foreground tabular-nums">
-                    {scale.value(value)}
-                  </span>
-                  {delta && (
-                    <span className="text-[10.5px] font-semibold text-success">{delta.value}</span>
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        <div className="flex items-center justify-between gap-3 border-t border-border/70 bg-card px-5 py-3 lg:col-span-2 sm:px-6">
-          <p className="text-[11.5px] text-muted-foreground">
-            Updated {stage.editors[0]?.when ?? "recently"}
-          </p>
-          <span className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
-            View details <ArrowRight className="size-3.5" />
+      <div className="relative p-5 sm:p-6">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span
+            className={`grid size-11 shrink-0 place-items-center rounded-xl ${look.tile} shadow-card`}
+          >
+            <Icon className="size-5" strokeWidth={2} />
+          </span>
+          <h3 className="text-[19px] font-semibold text-foreground">{stage.name}</h3>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/65 px-2.5 py-1 text-[11.5px] font-semibold text-muted-foreground">
+            {isText ? <MessageSquare className="size-3" /> : <Mail className="size-3" />}
+            {stage.message.channel}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border-strong px-2.5 py-1 text-[11.5px] font-medium text-muted-foreground">
+            <Gift className="size-3" />
+            {stage.offers[0]?.name ?? "No offer attached"}
+          </span>
+          <span
+            className={`inline-flex items-center gap-1.5 text-[11.5px] font-semibold ${paused ? "text-muted-foreground" : "text-success"}`}
+          >
+            <span className={`size-1.5 rounded-full ${paused ? "bg-border-strong" : "bg-success"}`} />
+            {paused ? "Paused" : "Live"}
+          </span>
+          <span className="ml-auto inline-flex items-center gap-1.5 text-[12.5px] font-medium text-muted-foreground">
+            <Clock className="size-3.5" strokeWidth={2.2} />
+            {timing ? timingLabel(timing) : stage.message.timing}
           </span>
         </div>
+
+        <div className="mt-5 grid rounded-2xl border border-border/60 bg-gradient-to-b from-secondary/45 to-secondary/10 sm:grid-cols-3 sm:divide-x sm:divide-border/60">
+          <StatTier
+            label="Guests reached"
+            value={stats ? scale.value(stats.reach.total) : "—"}
+            delta={stats?.reach.delta}
+          >
+            {stats && (
+              <>
+                <SubStat Icon={Mail} value={scale.value(stats.reach.email)} label="email" />
+                <SubStat Icon={MessageSquare} value={scale.value(stats.reach.phone)} label="text" />
+              </>
+            )}
+          </StatTier>
+          <StatTier
+            label="Click-through rate"
+            value={stats?.ctr.value ?? "—"}
+            delta={stats?.ctr.delta}
+          >
+            {stats && (
+              <SubStat Icon={MousePointerClick} value={scale.value(stats.ctr.clicks)} label="clicks" />
+            )}
+          </StatTier>
+          <StatTier
+            label="Engagement"
+            value={engagement?.rate ?? "—"}
+            delta={engagement?.delta}
+          >
+            {engagement && (
+              <>
+                <SubStat
+                  Icon={MousePointerClick}
+                  value={scale.value(sum(engagement.email.clicks, engagement.phone.clicks))}
+                  label="clicks"
+                />
+                <SubStat
+                  Icon={Reply}
+                  value={scale.value(sum(engagement.email.responses, engagement.phone.responses))}
+                  label="responses"
+                />
+                <SubStat
+                  Icon={PhoneCall}
+                  value={scale.value(sum(engagement.email.calls, engagement.phone.calls))}
+                  label="calls"
+                />
+              </>
+            )}
+          </StatTier>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-2.5">
+          <Btn
+            variant="secondary"
+            onClick={(e) => {
+              e?.stopPropagation();
+              onPreview();
+            }}
+          >
+            <Eye className="size-4" /> Preview
+          </Btn>
+          <Btn
+            variant="secondary"
+            onClick={(e) => {
+              e?.stopPropagation();
+              setPaused((value) => !value);
+            }}
+          >
+            {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
+            {paused ? "Resume" : "Pause"}
+          </Btn>
+          <Btn onClick={open}>
+            <Pencil className="size-4" /> Edit campaign
+          </Btn>
+          <div className="ml-auto flex items-center gap-3">
+            <p className="text-[12px] text-muted-foreground">
+              Updated {stage.editors[0]?.when ?? "recently"}
+            </p>
+            <Btn
+              variant="ghost"
+              onClick={(e) => {
+                e?.stopPropagation();
+                setDetailsOpen(true);
+              }}
+            >
+              <BarChart3 className="size-4" /> See details
+            </Btn>
+          </div>
+        </div>
       </div>
+
+      <StatsModal
+        stage={stage}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+      />
     </div>
   );
 }
