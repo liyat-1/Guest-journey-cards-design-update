@@ -29,7 +29,7 @@ import { useScale } from "@/components/ota/scale";
 import { StagePreview } from "@/components/ota/StagePreview";
 import { Modal, ModalSection } from "@/components/ota/Modal";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Bar, Btn, DataPoint, DeltaTag, SectionHeading } from "@/components/ota/ui";
+import { Bar, Btn, DataPoint, DeltaTag, Field, SectionHeading } from "@/components/ota/ui";
 
 const title = "Guest journey — OTA Buster | Directful";
 const description =
@@ -120,7 +120,7 @@ function StatTier({
 }: {
   label: string;
   value: string;
-  delta?: Delta;
+  delta?: Delta | undefined;
   children?: ReactNode;
 }) {
   return (
