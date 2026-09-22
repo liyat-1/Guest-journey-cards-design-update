@@ -27,6 +27,37 @@ function OtaHeader() {
   const otaGuests = scale.value(results.find((r) => r.id === "ota-guests")?.value ?? "");
   const recovered = scale.value(results.find((r) => r.id === "revenue")?.value ?? "");
 
+  if (pathname === "/ota-buster/performance") {
+    return (
+      <div className="border-b border-border bg-card">
+        <div className={`${shellWidth} flex min-h-16 items-center gap-5`}>
+          <div className="flex shrink-0 items-center gap-2.5">
+            <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground shadow-raise">
+              <Zap className="size-4.5" strokeWidth={2.2} />
+            </span>
+            <span className="font-display text-[15px] font-semibold text-foreground">OTA Buster</span>
+          </div>
+          <nav className="ml-auto flex min-w-0 gap-1 overflow-x-auto">
+            {nav.map((n) => {
+              const on = n.exact ? pathname === n.to : pathname.startsWith(n.to);
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  className={`shrink-0 rounded-lg px-3 py-2 text-[12.5px] font-semibold transition-colors ${
+                    on ? "bg-primary-soft text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  }`}
+                >
+                  {n.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative overflow-hidden border-b border-border">
       <div className="brand-gradient absolute inset-0" aria-hidden />
@@ -105,6 +136,7 @@ function OtaHeader() {
 
 function Shell() {
   const { sidebarCollapsed, toggleSidebar } = useOta();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <div className="flex min-h-screen w-full bg-background">
       <AppSidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
@@ -129,7 +161,7 @@ function Shell() {
 
         <OtaHeader />
 
-        <main className="app-canvas min-h-[70vh] flex-1">
+        <main className={`${pathname === "/ota-buster/performance" ? "bg-background" : "app-canvas"} min-h-[70vh] flex-1`}>
           <div className={`${shellWidth} py-8 sm:py-10`}>
             <div className="rise-in">
               <Outlet />
