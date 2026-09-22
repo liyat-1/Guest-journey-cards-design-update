@@ -1,25 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import {
-  channelPerformance,
-  journeyFunnel,
-  offerPerformance,
-  propertyPerformance,
-  results,
-  segments,
-} from "@/components/ota/analytics";
-import {
-  Bar,
-  DataTable,
-  DeltaTag,
-  Panel,
-  PanelHeader,
-  ResultTile,
-  SectionHeading,
-  Td,
-} from "@/components/ota/ui";
+import { ArrowRight, CheckCircle2, Info, Sparkles, TrendingUp, Users } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { journeyFunnel } from "@/components/ota/analytics";
+import { Btn } from "@/components/ota/ui";
 import { FilterBar } from "@/components/ota/FilterBar";
-import { useScale } from "@/components/ota/scale";
 
 const title = "Performance — OTA Buster | Directful";
 const description =
@@ -39,249 +23,126 @@ export const Route = createFileRoute("/ota-buster/performance")({
   component: PerformancePage,
 });
 
-const views = ["Journey", "Guest segments", "Offers", "Channels", "Properties"] as const;
-type View = (typeof views)[number];
+const trendData = [
+  { date: "Aug 19", guests: 310 },
+  { date: "Aug 21", guests: 324 },
+  { date: "Aug 23", guests: 308 },
+  { date: "Aug 25", guests: 311 },
+  { date: "Aug 27", guests: 336 },
+  { date: "Aug 29", guests: 347 },
+  { date: "Aug 31", guests: 329 },
+  { date: "Sep 2", guests: 292 },
+];
 
-function JourneyView() {
-  const scale = useScale();
-  const max = Math.max(...journeyFunnel.map((s) => s.reached));
+function ReachRing() {
   return (
-    <div className="space-y-5">
-      <Panel>
-        <PanelHeader
-          title="Journey performance"
-          hint="How many guests each stage reaches, and what it converts."
-        />
-        <div className="mt-4 space-y-4">
-          {journeyFunnel.map((s) => (
-            <div key={s.id}>
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-[13.5px] font-semibold text-foreground">{s.name}</p>
-                <p className="text-[12.5px] text-muted-foreground">
-                  <span className="font-semibold text-foreground">{scale.count(s.reached)}</span>{" "}
-                  guests reached ·{" "}
-                  <span className="font-semibold text-foreground">{scale.count(s.converted)}</span>{" "}
-                  direct conversions ·{" "}
-                  <span className="font-semibold text-foreground">{scale.value(s.revenue)}</span>{" "}
-                  direct revenue
-                </p>
-              </div>
-              <div className="mt-2">
-                <Bar value={s.reached} max={max} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </Panel>
+    <div className="relative mx-auto size-[210px] shrink-0 sm:size-[238px]">
+      <svg viewBox="0 0 240 240" className="size-full -rotate-90" aria-label="31.1% of eligible guests made reachable">
+        <circle cx="120" cy="120" r="92" fill="none" className="stroke-secondary" strokeWidth="24" />
+        <circle cx="120" cy="120" r="92" fill="none" className="stroke-primary" strokeWidth="24" strokeLinecap="round" strokeDasharray="180 578" />
+      </svg>
+      <div className="absolute inset-0 grid place-content-center text-center">
+        <strong className="font-display text-[38px] leading-none font-semibold text-foreground">5.0K</strong>
+        <span className="mt-2 text-[12px] font-semibold text-primary">31.1% made reachable</span>
+        <span className="mx-auto mt-1 max-w-[118px] text-[10.5px] leading-snug text-muted-foreground">with Level 1 enrichment</span>
+      </div>
     </div>
   );
 }
 
-function SegmentView() {
-  const scale = useScale();
-  return (
-    <Panel>
-      <PanelHeader
-        title="Guest segment performance"
-        hint="Which guests respond, and what they respond to."
-      />
-      <div className="mt-4">
-        <DataTable
-          columns={[
-            "Segment",
-            "Guests",
-            "Conversion rate",
-            "Direct revenue",
-            "Revenue per guest",
-            "Best offer",
-          ]}
-        >
-          {segments.map((s) => (
-            <tr key={s.id}>
-              <Td align="left" strong>
-                {s.name}
-              </Td>
-              <Td>{scale.count(s.guests)}</Td>
-              <Td strong>
-                <span className="inline-flex items-center gap-2">
-                  {scale.value(s.conversionRate)}
-                  <DeltaTag delta={s.delta} />
-                </span>
-              </Td>
-              <Td strong>{scale.value(s.directRevenue)}</Td>
-              <Td>{s.revenuePerGuest}</Td>
-              <Td>{s.bestOffer}</Td>
-            </tr>
-          ))}
-        </DataTable>
-      </div>
-    </Panel>
-  );
-}
-
-function OfferView() {
-  const scale = useScale();
-  return (
-    <Panel>
-      <PanelHeader
-        title="Offer performance"
-        hint="Every incentive, what it costs you and what it returns."
-      />
-      <div className="mt-4">
-        <DataTable
-          columns={[
-            "Offer",
-            "Guests reached",
-            "Conversions",
-            "Conversion rate",
-            "Direct revenue",
-            "Commission avoided",
-            "Best segment",
-          ]}
-        >
-          {offerPerformance.map((o) => (
-            <tr key={o.id}>
-              <Td align="left" strong>
-                {o.name}
-              </Td>
-              <Td>{scale.count(o.reached)}</Td>
-              <Td>{scale.count(o.conversions)}</Td>
-              <Td strong>
-                <span className="inline-flex items-center gap-2">
-                  {scale.value(o.conversionRate)}
-                  <DeltaTag delta={o.delta} />
-                </span>
-              </Td>
-              <Td strong>{scale.value(o.revenue)}</Td>
-              <Td>{scale.value(o.commissionAvoided)}</Td>
-              <Td>{o.bestSegment}</Td>
-            </tr>
-          ))}
-        </DataTable>
-      </div>
-    </Panel>
-  );
-}
-
-function ChannelView() {
-  const scale = useScale();
-  return (
-    <Panel>
-      <PanelHeader title="Channel performance" hint="Email against text, on the same measures." />
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        {channelPerformance.map((c) => (
-          <div key={c.id} className="rounded-xl border border-border p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-[14.5px] font-semibold text-foreground">{c.name}</p>
-              <DeltaTag delta={c.delta} suffix="conversion rate" />
-            </div>
-            <dl className="mt-3 grid grid-cols-2 gap-x-5 gap-y-2.5">
-              {[
-                ["Messages sent", scale.value(c.sent)],
-                ["Open rate", scale.value(c.openRate)],
-                ["Click-through rate", scale.value(c.ctr)],
-                ["Direct conversions", scale.count(c.conversions)],
-                ["Conversion rate", scale.value(c.conversionRate)],
-                ["Direct revenue", scale.value(c.revenue)],
-              ].map(([k, v]) => (
-                <div key={k}>
-                  <dt className="text-[11.5px] text-muted-foreground">{k}</dt>
-                  <dd className="mt-0.5 text-[15px] font-semibold tracking-[-0.01em] text-foreground">
-                    {v}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        ))}
-      </div>
-    </Panel>
-  );
-}
-
-function PropertyView() {
-  const scale = useScale();
-  return (
-    <Panel>
-      <PanelHeader
-        title="Property performance"
-        hint="OTA Buster results across every connected property."
-      />
-      <div className="mt-4">
-        <DataTable
-          columns={[
-            "Property",
-            "OTA guests",
-            "Guests reached",
-            "Direct conversions",
-            "Conversion rate",
-            "Direct revenue",
-            "Commission avoided",
-          ]}
-        >
-          {propertyPerformance.map((p) => (
-            <tr key={p.id}>
-              <Td align="left" strong>
-                {p.name}
-              </Td>
-              <Td>{scale.value(p.otaGuests)}</Td>
-              <Td>{scale.value(p.reached)}</Td>
-              <Td>{scale.count(p.conversions)}</Td>
-              <Td strong>{scale.value(p.conversionRate)}</Td>
-              <Td strong>{scale.value(p.revenue)}</Td>
-              <Td>{scale.value(p.commission)}</Td>
-            </tr>
-          ))}
-        </DataTable>
-      </div>
-    </Panel>
-  );
-}
-
 function PerformancePage() {
-  const scale = useScale();
-  const [view, setView] = useState<View>("Journey");
-
   return (
-    <div className="space-y-6">
-      <SectionHeading
-        title="Performance"
-        subtitle="Every OTA Buster analytics view in one place. Filter by date, property, offer and segment."
-      />
+    <div className="space-y-5 sm:space-y-6">
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold text-primary">Analytics overview</p>
+          <h1 className="font-display mt-1 text-[25px] leading-tight font-semibold text-foreground sm:text-[30px]">OTA Buster performance</h1>
+          <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-muted-foreground">See how guest data becomes reachable profiles and direct-booking value.</p>
+        </div>
+        <div className="hidden items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-card md:flex">
+          <span className="grid size-9 place-items-center rounded-lg bg-success/10 text-success"><TrendingUp className="size-4.5" /></span>
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground">Remaining opportunity</p>
+            <p className="font-display mt-0.5 text-[18px] leading-none font-semibold text-foreground">3,000–7,100 <span className="font-sans text-[11px] font-medium text-muted-foreground">guests</span></p>
+          </div>
+        </div>
+      </header>
 
-      <div className="-mx-6 border-y border-border bg-card">
-        <FilterBar />
-      </div>
+      <FilterBar />
 
-      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-6">
-        {results.map((r) => (
-          <ResultTile key={r.id} {...r} value={scale.value(r.value)} />
-        ))}
-      </div>
+      <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+        <div className="border-b border-border px-5 py-4 sm:px-6">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="min-w-0">
+              <h2 className="font-display text-[17px] font-semibold text-foreground">Where your guests stand</h2>
+              <p className="mt-1 text-[12px] text-muted-foreground">Aug 5 – Sep 3 · 30,000 profiles analyzed</p>
+            </div>
+            <span className="hidden items-center gap-1.5 text-[11px] font-medium text-muted-foreground sm:inline-flex"><Info className="size-3.5" /> Updated today</span>
+          </div>
+        </div>
 
-      <div className="flex flex-wrap gap-1 border-b border-border">
-        {views.map((v) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => setView(v)}
-            className={`relative px-3 pb-2.5 text-[13px] font-medium transition-colors ${
-              view === v ? "text-primary" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {v}
-            <span
-              className={`absolute inset-x-2 -bottom-px h-[2px] rounded-full ${view === v ? "bg-primary" : "bg-transparent"}`}
-            />
-          </button>
-        ))}
-      </div>
+        <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
+          <div className="flex flex-col items-center gap-8 p-6 sm:flex-row sm:p-8 lg:border-r lg:border-border">
+            <ReachRing />
+            <div className="w-full min-w-0 flex-1">
+              <p className="text-[11px] font-semibold text-muted-foreground">Eligible guest database</p>
+              <p className="font-display mt-1 text-[28px] font-semibold text-foreground">16,000</p>
+              <p className="mt-2 max-w-xs text-[12.5px] leading-relaxed text-muted-foreground">Profiles with enough booking data to improve reachability and future direct contact.</p>
+              <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-border pt-4">
+                <div><dt className="text-[10.5px] text-muted-foreground">Made reachable</dt><dd className="mt-1 text-[15px] font-semibold text-foreground">5,000</dd></div>
+                <div><dt className="text-[10.5px] text-muted-foreground">Still eligible</dt><dd className="mt-1 text-[15px] font-semibold text-foreground">11,000</dd></div>
+              </dl>
+            </div>
+          </div>
 
-      {view === "Journey" && <JourneyView />}
-      {view === "Guest segments" && <SegmentView />}
-      {view === "Offers" && <OfferView />}
-      {view === "Channels" && <ChannelView />}
-      {view === "Properties" && <PropertyView />}
+          <aside className="bg-secondary/35 p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[10.5px] font-semibold text-muted-foreground">Reach opportunity</p>
+              <span className="rounded-md bg-primary-soft px-2 py-1 text-[10.5px] font-semibold text-primary">53% analyzed</span>
+            </div>
+            <div className="mt-5 flex items-start gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground"><Users className="size-4.5" /></span>
+              <div className="min-w-0">
+                <p className="font-display text-[16px] font-semibold text-foreground">Level 1 made 5K guests reachable</p>
+                <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">31.1% of eligible profiles can now receive direct communication.</p>
+              </div>
+            </div>
+            <div className="mt-5 border-t border-border pt-5">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-success/10 text-success"><Sparkles className="size-3.5" /></span>
+                <div>
+                  <p className="text-[12.5px] font-semibold text-foreground">Level 2 could add up to 7K more</p>
+                  <p className="mt-1 text-[11.5px] leading-relaxed text-muted-foreground">Additional enrichment typically recovers 30–80% of profiles currently out of reach.</p>
+                </div>
+              </div>
+              <Btn variant="ghost" size="sm" className="mt-3 px-0 text-primary">Explore opportunity <ArrowRight className="size-3.5" /></Btn>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-6">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
+          <div className="min-w-0">
+            <h2 className="font-display text-[17px] font-semibold text-foreground">Guests made reachable over time</h2>
+            <p className="mt-1 text-[12px] text-muted-foreground">Level 1 enrichment · Aug 19 – Sep 2</p>
+          </div>
+          <span className="hidden items-center gap-2 text-[11px] font-medium text-muted-foreground sm:flex"><span className="size-2 rounded-full bg-primary" /> Reachable guests</span>
+        </div>
+        <div className="mt-7 h-[270px] w-full sm:h-[320px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={trendData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+              <defs><linearGradient id="reachFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--primary)" stopOpacity={0.14} /><stop offset="100%" stopColor="var(--primary)" stopOpacity={0} /></linearGradient></defs>
+              <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 5" />
+              <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} dy={10} />
+              <YAxis domain={[0, 400]} axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} />
+              <Tooltip cursor={{ stroke: "var(--border-strong)", strokeDasharray: "4 4" }} contentStyle={{ border: "1px solid var(--border)", borderRadius: 8, boxShadow: "var(--shadow-pop)", fontSize: 12 }} formatter={(value) => [`${value ?? 0} guests`, "Made reachable"]} />
+              <Area type="monotone" dataKey="guests" stroke="var(--primary)" strokeWidth={2.5} fill="url(#reachFill)" activeDot={{ r: 5, fill: "var(--primary)", stroke: "var(--card)", strokeWidth: 3 }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="mt-3 flex items-center gap-2 border-t border-border pt-4 text-[11.5px] text-muted-foreground"><CheckCircle2 className="size-4 text-success" /> Reach remained above 290 guests throughout the selected period.</div>
+      </section>
     </div>
   );
 }
